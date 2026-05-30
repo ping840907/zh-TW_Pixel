@@ -26,6 +26,9 @@
     #define DATE_RI_X 123
     #define DATE_ZHOU_X 146
     #define DATE_WEEK_X 169
+    // 月日合併為單一字串後，向左對齊至此 x（與上方大字 TIME_COL1_X 切齊，字與字間距 1px）
+    #define DATE_MD_LEFT_X TIME_COL1_X
+    #define DATE_GLYPH_GAP 1
 #else
     #define TIME_IMAGE_SIZE GSize(66, 66)
     #define DATE_IMAGE_SIZE GSize(11, 11)
@@ -67,20 +70,12 @@ typedef enum {
     LAYER_TYPE_STATIC,
 } LayerType;
 
-// 動畫狀態
-typedef enum {
-    ANIM_STATE_IDLE,
-    ANIM_STATE_FADE_OUT,
-    ANIM_STATE_FADE_IN,
-} AnimationState;
-
 // 顯示圖層結構
 typedef struct {
     BitmapLayer *layer;
     GBitmap *bitmap;
     uint32_t current_resource_id;
     PropertyAnimation *animation;
-    AnimationState anim_state;
     GRect base_frame;
     LayerType type;
 } DisplayLayer;
@@ -110,6 +105,13 @@ typedef struct {
     DisplayLayer yue_layer;
     DisplayLayer ri_layer;
     DisplayLayer zhou_layer;
+
+    // 日期區塊上次顯示的數值，用於偵測「月／日／週」各區塊是否變動以觸發跳動動畫。
+    // 初始化為 -1（不可能的數值）：用以辨識「初次載入」，此時僅靜態載入不跳動，
+    // 與時間數字一致；其後才在各區塊數值變動時播放跳動。
+    int last_month;
+    int last_day;
+    int last_week;
 } AppState;
 
 // ==================== 全域狀態 ====================
@@ -276,7 +278,6 @@ static void display_layer_init(DisplayLayer *dl, Layer *parent, GRect frame, Lay
 
     dl->base_frame = frame;
     dl->type = type;
-    dl->anim_state = ANIM_STATE_IDLE;
 
     dl->layer = bitmap_layer_create(frame);
     if (!dl->layer) {
@@ -298,7 +299,6 @@ static void display_layer_cleanup_animation(DisplayLayer *dl) {
         property_animation_destroy(dl->animation);
         dl->animation = NULL;
     }
-    dl->anim_state = ANIM_STATE_IDLE;
 }
 
 static void display_layer_load_resource(DisplayLayer *dl, uint32_t resource_id) {
@@ -323,15 +323,10 @@ static void display_layer_load_resource(DisplayLayer *dl, uint32_t resource_id) 
     }
 }
 
-static void display_layer_set_position(DisplayLayer *dl, bool offset_for_animation) {
+// 將圖層歸位至基準位置（base_frame）。
+static void display_layer_set_position(DisplayLayer *dl) {
     if (!dl || !dl->layer) return;
-
-    GRect frame = dl->base_frame;
-    if (offset_for_animation) {
-        frame.origin.y += ANIMATION_OFFSET_Y;
-    }
-
-    layer_set_frame(bitmap_layer_get_layer(dl->layer), frame);
+    layer_set_frame(bitmap_layer_get_layer(dl->layer), dl->base_frame);
 }
 
 static void display_layer_deinit(DisplayLayer *dl) {
@@ -350,7 +345,6 @@ static void display_layer_deinit(DisplayLayer *dl) {
     }
 
     dl->current_resource_id = RESOURCE_ID_NONE;
-    dl->anim_state = ANIM_STATE_IDLE;
 }
 
 // ==================== 圖層遍歷系統 ====================
@@ -410,10 +404,10 @@ static void refresh_theme_cb(DisplayLayer *dl, void *context) {
     }
 }
 
-// 依當前動畫設定調整圖層起始位置（啟用時下偏 ANIMATION_OFFSET_Y，關閉時歸位至基準位置）
+// 停止圖層進行中的動畫並歸位至基準位置（切換動畫開關時呼叫，以中止殘留動畫）
 static void set_anim_pos_cb(DisplayLayer *dl, void *context) {
     display_layer_cleanup_animation(dl);
-    display_layer_set_position(dl, false);
+    display_layer_set_position(dl);
 }
 
 // ==================== 動畫系統 ====================
@@ -429,7 +423,7 @@ static void anim_fade_in_stopped(Animation *anim, bool finished, void *context) 
 
     if (!finished) {
         // 若入場動畫被中斷（如分鐘快速連切），強制歸位至基準位置，避免圖層殘留偏移
-        display_layer_set_position(dl, false);
+        display_layer_set_position(dl);
     }
 
     display_layer_cleanup_animation(dl);
@@ -445,7 +439,7 @@ static void anim_fade_out_stopped(Animation *anim, bool finished, void *context)
     if (!finished) {
         // 若離場動畫被中斷，強制載入目標資源並歸位，避免顯示殘留的舊內容
         display_layer_load_resource(dl, dl->current_resource_id);
-        display_layer_set_position(dl, false);
+        display_layer_set_position(dl);
         display_layer_cleanup_animation(dl);
         return;
     }
@@ -465,12 +459,11 @@ static void anim_fade_out_stopped(Animation *anim, bool finished, void *context)
     dl->animation = property_animation_create_layer_frame(layer, &from, &to);
     if (!dl->animation) {
         APP_LOG(APP_LOG_LEVEL_ERROR, "Failed to create fade-in animation, falling back to static update");
-        display_layer_set_position(dl, false);
+        display_layer_set_position(dl);
         display_layer_cleanup_animation(dl);
         return;
     }
 
-    dl->anim_state = ANIM_STATE_FADE_IN;
     animation_set_duration((Animation *)dl->animation, ANIMATION_DURATION_MS / 2);
     animation_set_curve((Animation *)dl->animation, AnimationCurveEaseOut);
     animation_set_handlers((Animation *)dl->animation,
@@ -487,7 +480,7 @@ static void display_layer_update_animated(DisplayLayer *dl, uint32_t resource_id
         // 圖層尚無內容，動畫期間完全不可見，直接載入並定位即可
         display_layer_load_resource(dl, resource_id);
         dl->current_resource_id = resource_id;
-        display_layer_set_position(dl, false);
+        display_layer_set_position(dl);
         return;
     }
 
@@ -501,7 +494,6 @@ static void display_layer_update_animated(DisplayLayer *dl, uint32_t resource_id
     
     dl->animation = property_animation_create_layer_frame(layer, &from, &to);
     if (dl->animation) {
-        dl->anim_state = ANIM_STATE_FADE_OUT;
         animation_set_duration((Animation *)dl->animation, ANIMATION_DURATION_MS / 2);
         animation_set_curve((Animation *)dl->animation, AnimationCurveEaseIn);
         animation_set_handlers((Animation *)dl->animation,
@@ -512,7 +504,7 @@ static void display_layer_update_animated(DisplayLayer *dl, uint32_t resource_id
         // 避免 current_resource_id 已更新但 bitmap 未載入導致圖層卡死
         APP_LOG(APP_LOG_LEVEL_WARNING, "Failed to create fade-out animation, falling back to static update");
         display_layer_load_resource(dl, resource_id);
-        display_layer_set_position(dl, false);
+        display_layer_set_position(dl);
     }
 }
 
@@ -520,7 +512,7 @@ static void display_layer_update_static(DisplayLayer *dl, uint32_t resource_id) 
     if (!dl || !dl->layer) return;
 
     display_layer_cleanup_animation(dl);
-    display_layer_set_position(dl, false);
+    display_layer_set_position(dl);
     display_layer_load_resource(dl, resource_id);
     dl->current_resource_id = resource_id;
 }
@@ -534,6 +526,189 @@ static void display_layer_update(DisplayLayer *dl, uint32_t resource_id) {
         display_layer_update_static(dl, resource_id);
     }
 }
+
+// ==================== 日期區塊佈局與動畫（Emery 專用）====================
+//
+// Emery 平台上，月與日合併為一條字串「X月X日」，依實際出現的字形緊鄰排列
+// （字與字間距 DATE_GLYPH_GAP），整串向左對齊至 DATE_MD_LEFT_X 以與上方大字切齊。
+// 顯示以「月／日／週」三個區塊為單位：初次載入僅靜態載入、不跳動（與時間數字一致），
+// 其後當某區塊數值變動時，整塊（含數字與「月／日／周」標籤）一起播放跳動動畫。
+
+#if defined(PBL_PLATFORM_EMERY)
+
+// 跳動第一段（下移）結束後接續第二段（上移回 base）。內容已於跳動開始時載入，
+// 故此處僅做位置動畫，不再換圖，確保數字／文字在整段跳動期間皆持續可見。
+static void date_anim_down_stopped(Animation *anim, bool finished, void *context) {
+    DisplayLayer *dl = (DisplayLayer *)context;
+    if (!dl || !dl->layer) {
+        if (dl) display_layer_cleanup_animation(dl);
+        return;
+    }
+
+    Layer *layer = bitmap_layer_get_layer(dl->layer);
+    if (!finished || !layer) {
+        // 下移段被中斷：直接歸位，避免殘留偏移
+        display_layer_set_position(dl);
+        display_layer_cleanup_animation(dl);
+        return;
+    }
+
+    GRect from = layer_get_frame(layer);
+    GRect to = dl->base_frame;
+
+    dl->animation = property_animation_create_layer_frame(layer, &from, &to);
+    if (!dl->animation) {
+        display_layer_set_position(dl);
+        display_layer_cleanup_animation(dl);
+        return;
+    }
+
+    animation_set_duration((Animation *)dl->animation, ANIMATION_DURATION_MS / 2);
+    animation_set_curve((Animation *)dl->animation, AnimationCurveEaseOut);
+    animation_set_handlers((Animation *)dl->animation,
+                           (AnimationHandlers){.stopped = anim_fade_in_stopped}, dl);
+    animation_schedule((Animation *)dl->animation);
+}
+
+// 強制讓圖層播放一次純垂直跳動（自 base 下移 ANIMATION_OFFSET_Y、再上移回 base），
+// 不受「內容未變」或「先前為空」限制，使同一區塊內所有字能同步跳動。
+static void date_layer_jump(DisplayLayer *dl, uint32_t resource_id) {
+    if (!dl || !dl->layer) return;
+
+    // 無內容的字形（如單位數月份的十位）直接清空歸位，毋須動畫
+    if (resource_id == RESOURCE_ID_NONE) {
+        display_layer_update_static(dl, RESOURCE_ID_NONE);
+        return;
+    }
+
+    display_layer_cleanup_animation(dl);
+
+    Layer *layer = bitmap_layer_get_layer(dl->layer);
+
+    // 立即載入內容並瞬間歸位至最終水平位置：
+    //   - 內容於跳動開始時即載入，使新數字／文字在整段下移與上移期間皆可見，
+    //     避免數字比「月／日／周」標籤更晚出現的瞬間缺失。
+    //   - 僅調整水平位置、不再換圖，使跳動維持「自 base 下移、再上移回 base」的純垂直動作。
+    display_layer_load_resource(dl, resource_id);
+    dl->current_resource_id = resource_id;
+    layer_set_frame(layer, dl->base_frame);
+
+    // 第一段：自 base_frame 下移 ANIMATION_OFFSET_Y，結束後由 date_anim_down_stopped 上移回 base
+    GRect from = dl->base_frame;
+    GRect to = from;
+    to.origin.y += ANIMATION_OFFSET_Y;
+
+    dl->animation = property_animation_create_layer_frame(layer, &from, &to);
+    if (dl->animation) {
+        animation_set_duration((Animation *)dl->animation, ANIMATION_DURATION_MS / 2);
+        animation_set_curve((Animation *)dl->animation, AnimationCurveEaseIn);
+        animation_set_handlers((Animation *)dl->animation,
+                              (AnimationHandlers){.stopped = date_anim_down_stopped}, dl);
+        animation_schedule((Animation *)dl->animation);
+    } else {
+        // 動畫建立失敗：內容已載入，僅需歸位
+        APP_LOG(APP_LOG_LEVEL_WARNING, "Failed to create date jump animation, falling back to static update");
+        display_layer_set_position(dl);
+        display_layer_cleanup_animation(dl);
+    }
+}
+
+// 區塊未變動時，僅將圖層歸位至（可能因月日字串重新對齊而位移的）base_frame，內容保持不變。
+static void date_layer_reposition(DisplayLayer *dl) {
+    if (!dl) return;
+    display_layer_cleanup_animation(dl);
+    display_layer_set_position(dl);
+}
+
+// 設定日期圖層於日期列上的水平位置（更新 base_frame）。
+static void date_layer_set_base(DisplayLayer *dl, int x) {
+    if (!dl) return;
+    dl->base_frame = GRect(x, DATE_ROW_Y, DATE_IMAGE_SIZE.w, DATE_IMAGE_SIZE.h);
+}
+
+// 套用單一區塊：
+//   - changed 且 allow_animation（且動畫已啟用）：整塊跳動。
+//   - changed 但不允許動畫（初次載入或動畫關閉）：靜態載入新內容並歸位，不跳動。
+//   - 未變動：僅重新歸位（內容不變，因應月日字串對齊位移）。
+static void date_block_apply(DisplayLayer **layers, const uint32_t *res, int count,
+                             bool changed, bool allow_animation) {
+    for (int i = 0; i < count; i++) {
+        if (changed) {
+            if (allow_animation && s_app.animation_enabled) {
+                date_layer_jump(layers[i], res[i]);
+            } else {
+                display_layer_update_static(layers[i], res[i]);
+            }
+        } else {
+            date_layer_reposition(layers[i]);
+        }
+    }
+}
+
+static void layout_and_animate_date_emery(int month, int day, int week,
+        uint32_t month_tens, uint32_t month_ones,
+        uint32_t day_tens, uint32_t day_ones, uint32_t week_res) {
+
+    const int step = DATE_IMAGE_SIZE.w + DATE_GLYPH_GAP;
+
+    // 月日字串的字形順序：[月十位][月個位][月][日十位][日個位][日]
+    // 缺省（NONE）的字形不佔位，使整條字串始終緊鄰排列。
+    DisplayLayer *md_layers[6] = {
+        &s_app.month_layers[0], &s_app.month_layers[1], &s_app.yue_layer,
+        &s_app.day_layers[0], &s_app.day_layers[1], &s_app.ri_layer
+    };
+    uint32_t md_res[6] = {
+        month_tens, month_ones, RESOURCE_ID_IMG_YUE,
+        day_tens, day_ones, RESOURCE_ID_IMG_RI
+    };
+
+    // 月日字串向左對齊：起始 x 固定於左邊界，與上方大字垂直切齊
+    int start_x = DATE_MD_LEFT_X;
+
+    int cursor = start_x;
+    for (int i = 0; i < 6; i++) {
+        if (md_res[i] != RESOURCE_ID_NONE) {
+            date_layer_set_base(md_layers[i], cursor);
+            cursor += step;
+        } else {
+            // 缺省字形稍後會被清空隱藏，位置無妨
+            date_layer_set_base(md_layers[i], start_x);
+        }
+    }
+
+    // 週區塊位置固定於右側
+    date_layer_set_base(&s_app.zhou_layer, DATE_ZHOU_X);
+    date_layer_set_base(&s_app.week_layer, DATE_WEEK_X);
+
+    // 初次載入（last_* 仍為 -1）僅靜態載入、不跳動，與時間數字行為一致；
+    // 其後才允許在區塊數值變動時播放跳動。
+    bool allow_animation = (s_app.last_month != -1);
+
+    bool month_changed = (month != s_app.last_month);
+    bool day_changed   = (day   != s_app.last_day);
+    bool week_changed  = (week  != s_app.last_week);
+
+    // 月區塊：十位、個位、「月」
+    DisplayLayer *month_block[3] = { &s_app.month_layers[0], &s_app.month_layers[1], &s_app.yue_layer };
+    uint32_t month_block_res[3]  = { month_tens, month_ones, RESOURCE_ID_IMG_YUE };
+    date_block_apply(month_block, month_block_res, 3, month_changed, allow_animation);
+
+    // 日區塊：十位、個位、「日」
+    DisplayLayer *day_block[3] = { &s_app.day_layers[0], &s_app.day_layers[1], &s_app.ri_layer };
+    uint32_t day_block_res[3]  = { day_tens, day_ones, RESOURCE_ID_IMG_RI };
+    date_block_apply(day_block, day_block_res, 3, day_changed, allow_animation);
+
+    // 週區塊：「周」、週值
+    DisplayLayer *week_block[2] = { &s_app.zhou_layer, &s_app.week_layer };
+    uint32_t week_block_res[2]  = { RESOURCE_ID_IMG_ZHOU, week_res };
+    date_block_apply(week_block, week_block_res, 2, week_changed, allow_animation);
+
+    s_app.last_month = month;
+    s_app.last_day = day;
+    s_app.last_week = week;
+}
+
+#endif // PBL_PLATFORM_EMERY
 
 // ==================== 時間更新邏輯 ====================
 
@@ -613,11 +788,18 @@ static void update_date_display(struct tm *tick_time) {
     uint32_t week_res = (week == 0) ? RESOURCE_ID_IMG_RI :
                         DATE_LOWERCASE_ONES_RESOURCES[week];
 
+#if defined(PBL_PLATFORM_EMERY)
+    // Emery：月日合併為向左對齊字串，並以區塊為單位播放跳動動畫
+    layout_and_animate_date_emery(month, day, week,
+                                  month_tens, month_ones,
+                                  day_tens, day_ones, week_res);
+#else
     display_layer_update(&s_app.month_layers[0], month_tens);
     display_layer_update(&s_app.month_layers[1], month_ones);
     display_layer_update(&s_app.day_layers[0], day_tens);
     display_layer_update(&s_app.day_layers[1], day_ones);
     display_layer_update(&s_app.week_layer, week_res);
+#endif
 }
 
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
@@ -669,8 +851,8 @@ static void setup_all_layers(Layer *parent) {
     };
 
     for (size_t i = 0; i < ARRAY_LENGTH(layers); i++) {
+        // display_layer_init 已以 frame（即 base_frame）建立圖層，毋須再次定位
         display_layer_init(layers[i], parent, frames[i], types[i]);
-        display_layer_set_position(layers[i], s_app.animation_enabled && types[i] != LAYER_TYPE_STATIC);
 
         if (static_resources[i] != RESOURCE_ID_NONE) {
             display_layer_load_resource(layers[i], static_resources[i]);
@@ -797,7 +979,12 @@ static void outbox_failed_handler(DictionaryIterator *iter, AppMessageResult rea
 
 static void app_init(void) {
     memset(&s_app, 0, sizeof(AppState));
-    
+
+    // 以 -1 標記「尚未顯示過」，確保初次載入時月／日／週三區塊都會播放跳動動畫
+    s_app.last_month = -1;
+    s_app.last_day = -1;
+    s_app.last_week = -1;
+
     theme_load_from_storage(&s_app.theme);
     
     if (persist_exists(KEY_ANIMATION_ENABLED)) {

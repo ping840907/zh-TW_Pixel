@@ -1,1070 +1,1066 @@
 {
-  "name": "ccwatchface",
-  "author": "Sloth8497",
-  "version": "2.0.0",
-  "keywords": [
-    "chinese",
-    "watchface",
-    "pixel",
-    "mandarin",
-    "中文"
-  ],
-  "description": "A Chinese-themed watchface for Pebble with custom bitmap resources.",
-  "license": "MIT",
-  "dependencies": {
-    "pebble-clay": "^1.0.4"
-  },
-  "pebble": {
-    "displayName": "CCWatchface",
-    "uuid": "ce8bff31-737b-43df-9fb7-aed63e6970af",
-    "sdkVersion": "3",
-    "enableMultiJS": true,
-    "targetPlatforms": [
-      "aplite",
-      "basalt",
-      "diorite",
-      "emery"
+    "author": "Sloth8497",
+    "dependencies": {
+        "pebble-clay": "^1.0.4"
+    },
+    "keywords": [
+        "chinese",
+        "watchface",
+        "pixel",
+        "mandarin",
+        "\u4e2d\u6587"
     ],
-    "watchapp": {
-      "watchface": true
-    },
-    "messageKeys": {
-      "KEY_HOUR_COLOR": 0,
-      "KEY_MINUTE_COLOR": 1,
-      "KEY_THEME_IS_DARK": 2,
-      "KEY_ANIMATION_ENABLED": 3,
-      "KEY_BACKGROUND_COLOR": 4,
-      "KEY_TEXT_COLOR": 5,
-      "KEY_BW_HOUR_ACCENT": 6
-    },
-    "capabilities": [
-      "configurable"
-    ],
-    "clay": {
-      "main": "src/js/app.js"
-    },
-    "resources": {
-      "media": [
-        {
-          "type": "bitmap",
-          "name": "IMAGE_MENU_ICON",
-          "file": "images/icon_launcher.png",
-          "menuIcon": true
+    "name": "ccwatchface",
+    "pebble": {
+        "capabilities": [
+            "configurable"
+        ],
+        "displayName": "CCWatchface",
+        "enableMultiJS": true,
+        "messageKeys": {
+            "KEY_ANIMATION_ENABLED": 3,
+            "KEY_BACKGROUND_COLOR": 4,
+            "KEY_BW_HOUR_ACCENT": 6,
+            "KEY_HOUR_COLOR": 0,
+            "KEY_MINUTE_COLOR": 1,
+            "KEY_TEXT_COLOR": 5,
+            "KEY_THEME_IS_DARK": 2
         },
-        {
-          "type": "bitmap",
-          "name": "IMG_U0",
-          "file": "time/u0.png",
-          "targetPlatforms": [
-            "emery"
-          ]
+        "projectType": "native",
+        "resources": {
+            "media": [
+                {
+                    "file": "images/date/su1.png",
+                    "name": "IMG_SU1",
+                    "targetPlatforms": [
+                        "emery"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/date/su1D.png",
+                    "name": "IMG_SU1",
+                    "targetPlatforms": [
+                        "aplite",
+                        "diorite",
+                        "basalt"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/date/su2.png",
+                    "name": "IMG_SU2",
+                    "targetPlatforms": [
+                        "emery"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/date/su2D.png",
+                    "name": "IMG_SU2",
+                    "targetPlatforms": [
+                        "aplite",
+                        "diorite",
+                        "basalt"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/date/su3.png",
+                    "name": "IMG_SU3",
+                    "targetPlatforms": [
+                        "emery"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/date/su3D.png",
+                    "name": "IMG_SU3",
+                    "targetPlatforms": [
+                        "aplite",
+                        "diorite",
+                        "basalt"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/date/su4.png",
+                    "name": "IMG_SU4",
+                    "targetPlatforms": [
+                        "emery"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/date/su4D.png",
+                    "name": "IMG_SU4",
+                    "targetPlatforms": [
+                        "aplite",
+                        "diorite",
+                        "basalt"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/date/su5.png",
+                    "name": "IMG_SU5",
+                    "targetPlatforms": [
+                        "emery"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/date/su5D.png",
+                    "name": "IMG_SU5",
+                    "targetPlatforms": [
+                        "aplite",
+                        "diorite",
+                        "basalt"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/date/su6.png",
+                    "name": "IMG_SU6",
+                    "targetPlatforms": [
+                        "emery"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/date/su6D.png",
+                    "name": "IMG_SU6",
+                    "targetPlatforms": [
+                        "aplite",
+                        "diorite",
+                        "basalt"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/date/su7.png",
+                    "name": "IMG_SU7",
+                    "targetPlatforms": [
+                        "emery"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/date/su7D.png",
+                    "name": "IMG_SU7",
+                    "targetPlatforms": [
+                        "aplite",
+                        "diorite",
+                        "basalt"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/date/su8.png",
+                    "name": "IMG_SU8",
+                    "targetPlatforms": [
+                        "emery"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/date/su8D.png",
+                    "name": "IMG_SU8",
+                    "targetPlatforms": [
+                        "aplite",
+                        "diorite",
+                        "basalt"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/date/su9.png",
+                    "name": "IMG_SU9",
+                    "targetPlatforms": [
+                        "emery"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/date/su9D.png",
+                    "name": "IMG_SU9",
+                    "targetPlatforms": [
+                        "aplite",
+                        "diorite",
+                        "basalt"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/date/su10.png",
+                    "name": "IMG_SU10",
+                    "targetPlatforms": [
+                        "emery"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/date/su10D.png",
+                    "name": "IMG_SU10",
+                    "targetPlatforms": [
+                        "aplite",
+                        "diorite",
+                        "basalt"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/date/sl1.png",
+                    "name": "IMG_SL1",
+                    "targetPlatforms": [
+                        "emery"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/date/sl1D.png",
+                    "name": "IMG_SL1",
+                    "targetPlatforms": [
+                        "aplite",
+                        "diorite",
+                        "basalt"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/date/sl2.png",
+                    "name": "IMG_SL2",
+                    "targetPlatforms": [
+                        "emery"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/date/sl2D.png",
+                    "name": "IMG_SL2",
+                    "targetPlatforms": [
+                        "aplite",
+                        "diorite",
+                        "basalt"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/date/sl3.png",
+                    "name": "IMG_SL3",
+                    "targetPlatforms": [
+                        "emery"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/date/sl3D.png",
+                    "name": "IMG_SL3",
+                    "targetPlatforms": [
+                        "aplite",
+                        "diorite",
+                        "basalt"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/date/sl4.png",
+                    "name": "IMG_SL4",
+                    "targetPlatforms": [
+                        "emery"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/date/sl4D.png",
+                    "name": "IMG_SL4",
+                    "targetPlatforms": [
+                        "aplite",
+                        "diorite",
+                        "basalt"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/date/sl5.png",
+                    "name": "IMG_SL5",
+                    "targetPlatforms": [
+                        "emery"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/date/sl5D.png",
+                    "name": "IMG_SL5",
+                    "targetPlatforms": [
+                        "aplite",
+                        "diorite",
+                        "basalt"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/date/sl6.png",
+                    "name": "IMG_SL6",
+                    "targetPlatforms": [
+                        "emery"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/date/sl6D.png",
+                    "name": "IMG_SL6",
+                    "targetPlatforms": [
+                        "aplite",
+                        "diorite",
+                        "basalt"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/date/sl7.png",
+                    "name": "IMG_SL7",
+                    "targetPlatforms": [
+                        "emery"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/date/sl7D.png",
+                    "name": "IMG_SL7",
+                    "targetPlatforms": [
+                        "aplite",
+                        "diorite",
+                        "basalt"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/date/sl8.png",
+                    "name": "IMG_SL8",
+                    "targetPlatforms": [
+                        "emery"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/date/sl8D.png",
+                    "name": "IMG_SL8",
+                    "targetPlatforms": [
+                        "aplite",
+                        "diorite",
+                        "basalt"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/date/sl9.png",
+                    "name": "IMG_SL9",
+                    "targetPlatforms": [
+                        "emery"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/date/sl9D.png",
+                    "name": "IMG_SL9",
+                    "targetPlatforms": [
+                        "aplite",
+                        "diorite",
+                        "basalt"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/date/sl10.png",
+                    "name": "IMG_SL10",
+                    "targetPlatforms": [
+                        "emery"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/date/sl10D.png",
+                    "name": "IMG_SL10",
+                    "targetPlatforms": [
+                        "aplite",
+                        "diorite",
+                        "basalt"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/date/sl20.png",
+                    "name": "IMG_SL20",
+                    "targetPlatforms": [
+                        "emery"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/date/sl20D.png",
+                    "name": "IMG_SL20",
+                    "targetPlatforms": [
+                        "aplite",
+                        "diorite",
+                        "basalt"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/date/sl30.png",
+                    "name": "IMG_SL30",
+                    "targetPlatforms": [
+                        "emery"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/date/sl30D.png",
+                    "name": "IMG_SL30",
+                    "targetPlatforms": [
+                        "aplite",
+                        "diorite",
+                        "basalt"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/date/yue.png",
+                    "name": "IMG_YUE",
+                    "targetPlatforms": [
+                        "emery"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/date/yueD.png",
+                    "name": "IMG_YUE",
+                    "targetPlatforms": [
+                        "aplite",
+                        "diorite",
+                        "basalt"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/date/ri.png",
+                    "name": "IMG_RI",
+                    "targetPlatforms": [
+                        "emery"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/date/riD.png",
+                    "name": "IMG_RI",
+                    "targetPlatforms": [
+                        "aplite",
+                        "diorite",
+                        "basalt"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/date/zhou.png",
+                    "name": "IMG_ZHOU",
+                    "targetPlatforms": [
+                        "emery"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/date/zhouD.png",
+                    "name": "IMG_ZHOU",
+                    "targetPlatforms": [
+                        "aplite",
+                        "diorite",
+                        "basalt"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/icon_launcher.png",
+                    "menuIcon": true,
+                    "name": "IMAGE_MENU_ICON",
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/time/ban.png",
+                    "name": "IMG_BAN",
+                    "targetPlatforms": [
+                        "emery"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/time/banD.png",
+                    "name": "IMG_BAN",
+                    "targetPlatforms": [
+                        "aplite",
+                        "diorite",
+                        "basalt"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/time/dian.png",
+                    "name": "IMG_DIAN",
+                    "targetPlatforms": [
+                        "emery"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/time/dianD.png",
+                    "name": "IMG_DIAN",
+                    "targetPlatforms": [
+                        "aplite",
+                        "diorite",
+                        "basalt"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/time/l0.png",
+                    "name": "IMG_L0",
+                    "targetPlatforms": [
+                        "emery"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/time/l0D.png",
+                    "name": "IMG_L0",
+                    "targetPlatforms": [
+                        "aplite",
+                        "diorite",
+                        "basalt"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/time/l1.png",
+                    "name": "IMG_L1",
+                    "targetPlatforms": [
+                        "emery"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/time/l10.png",
+                    "name": "IMG_L10",
+                    "targetPlatforms": [
+                        "emery"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/time/l10D.png",
+                    "name": "IMG_L10",
+                    "targetPlatforms": [
+                        "aplite",
+                        "diorite",
+                        "basalt"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/time/l1D.png",
+                    "name": "IMG_L1",
+                    "targetPlatforms": [
+                        "aplite",
+                        "diorite",
+                        "basalt"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/time/l2.png",
+                    "name": "IMG_L2",
+                    "targetPlatforms": [
+                        "emery"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/time/l20.png",
+                    "name": "IMG_L20",
+                    "targetPlatforms": [
+                        "emery"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/time/l20D.png",
+                    "name": "IMG_L20",
+                    "targetPlatforms": [
+                        "aplite",
+                        "diorite",
+                        "basalt"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/time/l2D.png",
+                    "name": "IMG_L2",
+                    "targetPlatforms": [
+                        "aplite",
+                        "diorite",
+                        "basalt"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/time/l3.png",
+                    "name": "IMG_L3",
+                    "targetPlatforms": [
+                        "emery"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/time/l30.png",
+                    "name": "IMG_L30",
+                    "targetPlatforms": [
+                        "emery"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/time/l30D.png",
+                    "name": "IMG_L30",
+                    "targetPlatforms": [
+                        "aplite",
+                        "diorite",
+                        "basalt"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/time/l3D.png",
+                    "name": "IMG_L3",
+                    "targetPlatforms": [
+                        "aplite",
+                        "diorite",
+                        "basalt"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/time/l4.png",
+                    "name": "IMG_L4",
+                    "targetPlatforms": [
+                        "emery"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/time/l4D.png",
+                    "name": "IMG_L4",
+                    "targetPlatforms": [
+                        "aplite",
+                        "diorite",
+                        "basalt"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/time/l5.png",
+                    "name": "IMG_L5",
+                    "targetPlatforms": [
+                        "emery"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/time/l5D.png",
+                    "name": "IMG_L5",
+                    "targetPlatforms": [
+                        "aplite",
+                        "diorite",
+                        "basalt"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/time/l6.png",
+                    "name": "IMG_L6",
+                    "targetPlatforms": [
+                        "emery"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/time/l6D.png",
+                    "name": "IMG_L6",
+                    "targetPlatforms": [
+                        "aplite",
+                        "diorite",
+                        "basalt"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/time/l7.png",
+                    "name": "IMG_L7",
+                    "targetPlatforms": [
+                        "emery"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/time/l7D.png",
+                    "name": "IMG_L7",
+                    "targetPlatforms": [
+                        "aplite",
+                        "diorite",
+                        "basalt"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/time/l8.png",
+                    "name": "IMG_L8",
+                    "targetPlatforms": [
+                        "emery"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/time/l8D.png",
+                    "name": "IMG_L8",
+                    "targetPlatforms": [
+                        "aplite",
+                        "diorite",
+                        "basalt"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/time/l9.png",
+                    "name": "IMG_L9",
+                    "targetPlatforms": [
+                        "emery"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/time/l9D.png",
+                    "name": "IMG_L9",
+                    "targetPlatforms": [
+                        "aplite",
+                        "diorite",
+                        "basalt"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/time/u0.png",
+                    "name": "IMG_U0",
+                    "targetPlatforms": [
+                        "emery"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/time/u0C.png",
+                    "name": "IMG_U0",
+                    "targetPlatforms": [
+                        "basalt"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/time/u0D.png",
+                    "name": "IMG_U0",
+                    "targetPlatforms": [
+                        "aplite",
+                        "diorite"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/time/u1.png",
+                    "name": "IMG_U1",
+                    "targetPlatforms": [
+                        "emery"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/time/u10.png",
+                    "name": "IMG_U10",
+                    "targetPlatforms": [
+                        "emery"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/time/u10C.png",
+                    "name": "IMG_U10",
+                    "targetPlatforms": [
+                        "basalt"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/time/u10D.png",
+                    "name": "IMG_U10",
+                    "targetPlatforms": [
+                        "aplite",
+                        "diorite"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/time/u1C.png",
+                    "name": "IMG_U1",
+                    "targetPlatforms": [
+                        "basalt"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/time/u1D.png",
+                    "name": "IMG_U1",
+                    "targetPlatforms": [
+                        "aplite",
+                        "diorite"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/time/u2.png",
+                    "name": "IMG_U2",
+                    "targetPlatforms": [
+                        "emery"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/time/u2C.png",
+                    "name": "IMG_U2",
+                    "targetPlatforms": [
+                        "basalt"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/time/u2D.png",
+                    "name": "IMG_U2",
+                    "targetPlatforms": [
+                        "aplite",
+                        "diorite"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/time/u3.png",
+                    "name": "IMG_U3",
+                    "targetPlatforms": [
+                        "emery"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/time/u3C.png",
+                    "name": "IMG_U3",
+                    "targetPlatforms": [
+                        "basalt"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/time/u3D.png",
+                    "name": "IMG_U3",
+                    "targetPlatforms": [
+                        "aplite",
+                        "diorite"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/time/u4.png",
+                    "name": "IMG_U4",
+                    "targetPlatforms": [
+                        "emery"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/time/u4C.png",
+                    "name": "IMG_U4",
+                    "targetPlatforms": [
+                        "basalt"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/time/u4D.png",
+                    "name": "IMG_U4",
+                    "targetPlatforms": [
+                        "aplite",
+                        "diorite"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/time/u5.png",
+                    "name": "IMG_U5",
+                    "targetPlatforms": [
+                        "emery"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/time/u5C.png",
+                    "name": "IMG_U5",
+                    "targetPlatforms": [
+                        "basalt"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/time/u5D.png",
+                    "name": "IMG_U5",
+                    "targetPlatforms": [
+                        "aplite",
+                        "diorite"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/time/u6.png",
+                    "name": "IMG_U6",
+                    "targetPlatforms": [
+                        "emery"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/time/u6C.png",
+                    "name": "IMG_U6",
+                    "targetPlatforms": [
+                        "basalt"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/time/u6D.png",
+                    "name": "IMG_U6",
+                    "targetPlatforms": [
+                        "aplite",
+                        "diorite"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/time/u7.png",
+                    "name": "IMG_U7",
+                    "targetPlatforms": [
+                        "emery"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/time/u7C.png",
+                    "name": "IMG_U7",
+                    "targetPlatforms": [
+                        "basalt"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/time/u7D.png",
+                    "name": "IMG_U7",
+                    "targetPlatforms": [
+                        "aplite",
+                        "diorite"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/time/u8.png",
+                    "name": "IMG_U8",
+                    "targetPlatforms": [
+                        "emery"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/time/u8C.png",
+                    "name": "IMG_U8",
+                    "targetPlatforms": [
+                        "basalt"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/time/u8D.png",
+                    "name": "IMG_U8",
+                    "targetPlatforms": [
+                        "aplite",
+                        "diorite"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/time/u9.png",
+                    "name": "IMG_U9",
+                    "targetPlatforms": [
+                        "emery"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/time/u9C.png",
+                    "name": "IMG_U9",
+                    "targetPlatforms": [
+                        "basalt"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/time/u9D.png",
+                    "name": "IMG_U9",
+                    "targetPlatforms": [
+                        "aplite",
+                        "diorite"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/time/zheng.png",
+                    "name": "IMG_ZHENG",
+                    "targetPlatforms": [
+                        "emery"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/time/zhengD.png",
+                    "name": "IMG_ZHENG",
+                    "targetPlatforms": [
+                        "aplite",
+                        "diorite",
+                        "basalt"
+                    ],
+                    "type": "bitmap"
+                }
+            ]
         },
-        {
-          "type": "bitmap",
-          "name": "IMG_U0",
-          "file": "time/u0C.png",
-          "targetPlatforms": [
-            "basalt"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_U0",
-          "file": "time/u0D.png",
-          "targetPlatforms": [
+        "sdkVersion": "3",
+        "targetPlatforms": [
             "aplite",
-            "diorite"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_U1",
-          "file": "time/u1.png",
-          "targetPlatforms": [
-            "emery"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_U1",
-          "file": "time/u1C.png",
-          "targetPlatforms": [
-            "basalt"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_U1",
-          "file": "time/u1D.png",
-          "targetPlatforms": [
-            "aplite",
-            "diorite"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_U2",
-          "file": "time/u2.png",
-          "targetPlatforms": [
-            "emery"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_U2",
-          "file": "time/u2C.png",
-          "targetPlatforms": [
-            "basalt"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_U2",
-          "file": "time/u2D.png",
-          "targetPlatforms": [
-            "aplite",
-            "diorite"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_U3",
-          "file": "time/u3.png",
-          "targetPlatforms": [
-            "emery"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_U3",
-          "file": "time/u3C.png",
-          "targetPlatforms": [
-            "basalt"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_U3",
-          "file": "time/u3D.png",
-          "targetPlatforms": [
-            "aplite",
-            "diorite"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_U4",
-          "file": "time/u4.png",
-          "targetPlatforms": [
-            "emery"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_U4",
-          "file": "time/u4C.png",
-          "targetPlatforms": [
-            "basalt"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_U4",
-          "file": "time/u4D.png",
-          "targetPlatforms": [
-            "aplite",
-            "diorite"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_U5",
-          "file": "time/u5.png",
-          "targetPlatforms": [
-            "emery"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_U5",
-          "file": "time/u5C.png",
-          "targetPlatforms": [
-            "basalt"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_U5",
-          "file": "time/u5D.png",
-          "targetPlatforms": [
-            "aplite",
-            "diorite"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_U6",
-          "file": "time/u6.png",
-          "targetPlatforms": [
-            "emery"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_U6",
-          "file": "time/u6C.png",
-          "targetPlatforms": [
-            "basalt"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_U6",
-          "file": "time/u6D.png",
-          "targetPlatforms": [
-            "aplite",
-            "diorite"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_U7",
-          "file": "time/u7.png",
-          "targetPlatforms": [
-            "emery"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_U7",
-          "file": "time/u7C.png",
-          "targetPlatforms": [
-            "basalt"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_U7",
-          "file": "time/u7D.png",
-          "targetPlatforms": [
-            "aplite",
-            "diorite"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_U8",
-          "file": "time/u8.png",
-          "targetPlatforms": [
-            "emery"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_U8",
-          "file": "time/u8C.png",
-          "targetPlatforms": [
-            "basalt"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_U8",
-          "file": "time/u8D.png",
-          "targetPlatforms": [
-            "aplite",
-            "diorite"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_U9",
-          "file": "time/u9.png",
-          "targetPlatforms": [
-            "emery"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_U9",
-          "file": "time/u9C.png",
-          "targetPlatforms": [
-            "basalt"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_U9",
-          "file": "time/u9D.png",
-          "targetPlatforms": [
-            "aplite",
-            "diorite"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_U10",
-          "file": "time/u10.png",
-          "targetPlatforms": [
-            "emery"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_U10",
-          "file": "time/u10C.png",
-          "targetPlatforms": [
-            "basalt"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_U10",
-          "file": "time/u10D.png",
-          "targetPlatforms": [
-            "aplite",
-            "diorite"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_DIAN",
-          "file": "time/dian.png",
-          "targetPlatforms": [
-            "emery"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_DIAN",
-          "file": "time/dianD.png",
-          "targetPlatforms": [
-            "aplite",
+            "basalt",
             "diorite",
-            "basalt"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_ZHENG",
-          "file": "time/zheng.png",
-          "targetPlatforms": [
             "emery"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_ZHENG",
-          "file": "time/zhengD.png",
-          "targetPlatforms": [
-            "aplite",
-            "diorite",
-            "basalt"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_BAN",
-          "file": "time/ban.png",
-          "targetPlatforms": [
-            "emery"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_BAN",
-          "file": "time/banD.png",
-          "targetPlatforms": [
-            "aplite",
-            "diorite",
-            "basalt"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_L0",
-          "file": "time/l0.png",
-          "targetPlatforms": [
-            "emery"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_L0",
-          "file": "time/l0D.png",
-          "targetPlatforms": [
-            "aplite",
-            "diorite",
-            "basalt"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_L1",
-          "file": "time/l1.png",
-          "targetPlatforms": [
-            "emery"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_L1",
-          "file": "time/l1D.png",
-          "targetPlatforms": [
-            "aplite",
-            "diorite",
-            "basalt"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_L2",
-          "file": "time/l2.png",
-          "targetPlatforms": [
-            "emery"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_L2",
-          "file": "time/l2D.png",
-          "targetPlatforms": [
-            "aplite",
-            "diorite",
-            "basalt"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_L3",
-          "file": "time/l3.png",
-          "targetPlatforms": [
-            "emery"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_L3",
-          "file": "time/l3D.png",
-          "targetPlatforms": [
-            "aplite",
-            "diorite",
-            "basalt"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_L4",
-          "file": "time/l4.png",
-          "targetPlatforms": [
-            "emery"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_L4",
-          "file": "time/l4D.png",
-          "targetPlatforms": [
-            "aplite",
-            "diorite",
-            "basalt"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_L5",
-          "file": "time/l5.png",
-          "targetPlatforms": [
-            "emery"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_L5",
-          "file": "time/l5D.png",
-          "targetPlatforms": [
-            "aplite",
-            "diorite",
-            "basalt"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_L6",
-          "file": "time/l6.png",
-          "targetPlatforms": [
-            "emery"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_L6",
-          "file": "time/l6D.png",
-          "targetPlatforms": [
-            "aplite",
-            "diorite",
-            "basalt"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_L7",
-          "file": "time/l7.png",
-          "targetPlatforms": [
-            "emery"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_L7",
-          "file": "time/l7D.png",
-          "targetPlatforms": [
-            "aplite",
-            "diorite",
-            "basalt"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_L8",
-          "file": "time/l8.png",
-          "targetPlatforms": [
-            "emery"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_L8",
-          "file": "time/l8D.png",
-          "targetPlatforms": [
-            "aplite",
-            "diorite",
-            "basalt"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_L9",
-          "file": "time/l9.png",
-          "targetPlatforms": [
-            "emery"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_L9",
-          "file": "time/l9D.png",
-          "targetPlatforms": [
-            "aplite",
-            "diorite",
-            "basalt"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_L10",
-          "file": "time/l10.png",
-          "targetPlatforms": [
-            "emery"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_L10",
-          "file": "time/l10D.png",
-          "targetPlatforms": [
-            "aplite",
-            "diorite",
-            "basalt"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_L20",
-          "file": "time/l20.png",
-          "targetPlatforms": [
-            "emery"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_L20",
-          "file": "time/l20D.png",
-          "targetPlatforms": [
-            "aplite",
-            "diorite",
-            "basalt"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_L30",
-          "file": "time/l30.png",
-          "targetPlatforms": [
-            "emery"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_L30",
-          "file": "time/l30D.png",
-          "targetPlatforms": [
-            "aplite",
-            "diorite",
-            "basalt"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_SU1",
-          "file": "date/su1.png",
-          "targetPlatforms": [
-            "emery"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_SU1",
-          "file": "date/su1D.png",
-          "targetPlatforms": [
-            "aplite",
-            "diorite",
-            "basalt"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_SU2",
-          "file": "date/su2.png",
-          "targetPlatforms": [
-            "emery"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_SU2",
-          "file": "date/su2D.png",
-          "targetPlatforms": [
-            "aplite",
-            "diorite",
-            "basalt"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_SU3",
-          "file": "date/su3.png",
-          "targetPlatforms": [
-            "emery"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_SU3",
-          "file": "date/su3D.png",
-          "targetPlatforms": [
-            "aplite",
-            "diorite",
-            "basalt"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_SU4",
-          "file": "date/su4.png",
-          "targetPlatforms": [
-            "emery"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_SU4",
-          "file": "date/su4D.png",
-          "targetPlatforms": [
-            "aplite",
-            "diorite",
-            "basalt"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_SU5",
-          "file": "date/su5.png",
-          "targetPlatforms": [
-            "emery"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_SU5",
-          "file": "date/su5D.png",
-          "targetPlatforms": [
-            "aplite",
-            "diorite",
-            "basalt"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_SU6",
-          "file": "date/su6.png",
-          "targetPlatforms": [
-            "emery"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_SU6",
-          "file": "date/su6D.png",
-          "targetPlatforms": [
-            "aplite",
-            "diorite",
-            "basalt"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_SU7",
-          "file": "date/su7.png",
-          "targetPlatforms": [
-            "emery"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_SU7",
-          "file": "date/su7D.png",
-          "targetPlatforms": [
-            "aplite",
-            "diorite",
-            "basalt"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_SU8",
-          "file": "date/su8.png",
-          "targetPlatforms": [
-            "emery"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_SU8",
-          "file": "date/su8D.png",
-          "targetPlatforms": [
-            "aplite",
-            "diorite",
-            "basalt"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_SU9",
-          "file": "date/su9.png",
-          "targetPlatforms": [
-            "emery"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_SU9",
-          "file": "date/su9D.png",
-          "targetPlatforms": [
-            "aplite",
-            "diorite",
-            "basalt"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_SU10",
-          "file": "date/su10.png",
-          "targetPlatforms": [
-            "emery"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_SU10",
-          "file": "date/su10D.png",
-          "targetPlatforms": [
-            "aplite",
-            "diorite",
-            "basalt"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_SL1",
-          "file": "date/sl1.png",
-          "targetPlatforms": [
-            "emery"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_SL1",
-          "file": "date/sl1D.png",
-          "targetPlatforms": [
-            "aplite",
-            "diorite",
-            "basalt"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_SL2",
-          "file": "date/sl2.png",
-          "targetPlatforms": [
-            "emery"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_SL2",
-          "file": "date/sl2D.png",
-          "targetPlatforms": [
-            "aplite",
-            "diorite",
-            "basalt"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_SL3",
-          "file": "date/sl3.png",
-          "targetPlatforms": [
-            "emery"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_SL3",
-          "file": "date/sl3D.png",
-          "targetPlatforms": [
-            "aplite",
-            "diorite",
-            "basalt"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_SL4",
-          "file": "date/sl4.png",
-          "targetPlatforms": [
-            "emery"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_SL4",
-          "file": "date/sl4D.png",
-          "targetPlatforms": [
-            "aplite",
-            "diorite",
-            "basalt"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_SL5",
-          "file": "date/sl5.png",
-          "targetPlatforms": [
-            "emery"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_SL5",
-          "file": "date/sl5D.png",
-          "targetPlatforms": [
-            "aplite",
-            "diorite",
-            "basalt"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_SL6",
-          "file": "date/sl6.png",
-          "targetPlatforms": [
-            "emery"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_SL6",
-          "file": "date/sl6D.png",
-          "targetPlatforms": [
-            "aplite",
-            "diorite",
-            "basalt"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_SL7",
-          "file": "date/sl7.png",
-          "targetPlatforms": [
-            "emery"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_SL7",
-          "file": "date/sl7D.png",
-          "targetPlatforms": [
-            "aplite",
-            "diorite",
-            "basalt"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_SL8",
-          "file": "date/sl8.png",
-          "targetPlatforms": [
-            "emery"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_SL8",
-          "file": "date/sl8D.png",
-          "targetPlatforms": [
-            "aplite",
-            "diorite",
-            "basalt"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_SL9",
-          "file": "date/sl9.png",
-          "targetPlatforms": [
-            "emery"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_SL9",
-          "file": "date/sl9D.png",
-          "targetPlatforms": [
-            "aplite",
-            "diorite",
-            "basalt"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_SL10",
-          "file": "date/sl10.png",
-          "targetPlatforms": [
-            "emery"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_SL10",
-          "file": "date/sl10D.png",
-          "targetPlatforms": [
-            "aplite",
-            "diorite",
-            "basalt"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_SL20",
-          "file": "date/sl20.png",
-          "targetPlatforms": [
-            "emery"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_SL20",
-          "file": "date/sl20D.png",
-          "targetPlatforms": [
-            "aplite",
-            "diorite",
-            "basalt"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_SL30",
-          "file": "date/sl30.png",
-          "targetPlatforms": [
-            "emery"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_SL30",
-          "file": "date/sl30D.png",
-          "targetPlatforms": [
-            "aplite",
-            "diorite",
-            "basalt"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_YUE",
-          "file": "date/yue.png",
-          "targetPlatforms": [
-            "emery"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_YUE",
-          "file": "date/yueD.png",
-          "targetPlatforms": [
-            "aplite",
-            "diorite",
-            "basalt"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_RI",
-          "file": "date/ri.png",
-          "targetPlatforms": [
-            "emery"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_RI",
-          "file": "date/riD.png",
-          "targetPlatforms": [
-            "aplite",
-            "diorite",
-            "basalt"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_ZHOU",
-          "file": "date/zhou.png",
-          "targetPlatforms": [
-            "emery"
-          ]
-        },
-        {
-          "type": "bitmap",
-          "name": "IMG_ZHOU",
-          "file": "date/zhouD.png",
-          "targetPlatforms": [
-            "aplite",
-            "diorite",
-            "basalt"
-          ]
+        ],
+        "uuid": "ce8bff31-737b-43df-9fb7-aed63e6970af",
+        "watchapp": {
+            "watchface": true
         }
-      ]
-    }
-  }
+    },
+    "version": "2.0.1"
 }
