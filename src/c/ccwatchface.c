@@ -26,9 +26,8 @@
     #define DATE_RI_X 123
     #define DATE_ZHOU_X 146
     #define DATE_WEEK_X 169
-    // 月日合併為單一字串後，於此區域內水平置中（字與字間距 1px）
-    #define DATE_MD_REGION_X 0
-    #define DATE_MD_REGION_W 144
+    // 月日合併為單一字串後，向左對齊至此 x（與上方大字 TIME_COL1_X 切齊，字與字間距 1px）
+    #define DATE_MD_LEFT_X TIME_COL1_X
     #define DATE_GLYPH_GAP 1
 #else
     #define TIME_IMAGE_SIZE GSize(66, 66)
@@ -636,14 +635,8 @@ static void layout_and_animate_date_emery(int month, int day, int week,
         day_tens, day_ones, RESOURCE_ID_IMG_RI
     };
 
-    int present = 0;
-    for (int i = 0; i < 6; i++) {
-        if (md_res[i] != RESOURCE_ID_NONE) present++;
-    }
-
-    // 字串總寬 = 各字寬度相加 + 字間 1px 間距，於區域內置中求得起始 x
-    int total_w = present * DATE_IMAGE_SIZE.w + (present - 1) * DATE_GLYPH_GAP;
-    int start_x = DATE_MD_REGION_X + (DATE_MD_REGION_W - total_w) / 2;
+    // 月日字串向左對齊：起始 x 固定於左邊界，與上方大字垂直切齊
+    int start_x = DATE_MD_LEFT_X;
 
     int cursor = start_x;
     for (int i = 0; i < 6; i++) {
