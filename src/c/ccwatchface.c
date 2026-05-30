@@ -115,7 +115,8 @@ typedef struct {
     DisplayLayer zhou_layer;
 
     // 日期區塊上次顯示的數值，用於偵測「月／日／週」各區塊是否變動以觸發跳動動畫。
-    // 初始化為 -1（不可能的數值），確保初次載入時三個區塊都會播放動畫。
+    // 初始化為 -1（不可能的數值）：用以辨識「初次載入」，此時僅靜態載入不跳動，
+    // 與時間數字一致；其後才在各區塊數值變動時播放跳動。
     int last_month;
     int last_day;
     int last_week;
@@ -645,12 +646,15 @@ static void date_layer_set_base(DisplayLayer *dl, int x) {
     dl->base_frame = GRect(x, DATE_ROW_Y, DATE_IMAGE_SIZE.w, DATE_IMAGE_SIZE.h);
 }
 
-// 套用單一區塊：changed 為真時整塊跳動（動畫關閉時改為靜態更新），
-// 否則僅重新歸位（內容不變，因應月日字串重新置中所造成的位移）。
-static void date_block_apply(DisplayLayer **layers, const uint32_t *res, int count, bool changed) {
+// 套用單一區塊：
+//   - changed 且 allow_animation（且動畫已啟用）：整塊跳動。
+//   - changed 但不允許動畫（初次載入或動畫關閉）：靜態載入新內容並歸位，不跳動。
+//   - 未變動：僅重新歸位（內容不變，因應月日字串對齊位移）。
+static void date_block_apply(DisplayLayer **layers, const uint32_t *res, int count,
+                             bool changed, bool allow_animation) {
     for (int i = 0; i < count; i++) {
         if (changed) {
-            if (s_app.animation_enabled) {
+            if (allow_animation && s_app.animation_enabled) {
                 date_layer_jump(layers[i], res[i]);
             } else {
                 display_layer_update_static(layers[i], res[i]);
@@ -696,6 +700,10 @@ static void layout_and_animate_date_emery(int month, int day, int week,
     date_layer_set_base(&s_app.zhou_layer, DATE_ZHOU_X);
     date_layer_set_base(&s_app.week_layer, DATE_WEEK_X);
 
+    // 初次載入（last_* 仍為 -1）僅靜態載入、不跳動，與時間數字行為一致；
+    // 其後才允許在區塊數值變動時播放跳動。
+    bool allow_animation = (s_app.last_month != -1);
+
     bool month_changed = (month != s_app.last_month);
     bool day_changed   = (day   != s_app.last_day);
     bool week_changed  = (week  != s_app.last_week);
@@ -703,17 +711,17 @@ static void layout_and_animate_date_emery(int month, int day, int week,
     // 月區塊：十位、個位、「月」
     DisplayLayer *month_block[3] = { &s_app.month_layers[0], &s_app.month_layers[1], &s_app.yue_layer };
     uint32_t month_block_res[3]  = { month_tens, month_ones, RESOURCE_ID_IMG_YUE };
-    date_block_apply(month_block, month_block_res, 3, month_changed);
+    date_block_apply(month_block, month_block_res, 3, month_changed, allow_animation);
 
     // 日區塊：十位、個位、「日」
     DisplayLayer *day_block[3] = { &s_app.day_layers[0], &s_app.day_layers[1], &s_app.ri_layer };
     uint32_t day_block_res[3]  = { day_tens, day_ones, RESOURCE_ID_IMG_RI };
-    date_block_apply(day_block, day_block_res, 3, day_changed);
+    date_block_apply(day_block, day_block_res, 3, day_changed, allow_animation);
 
     // 週區塊：「周」、週值
     DisplayLayer *week_block[2] = { &s_app.zhou_layer, &s_app.week_layer };
     uint32_t week_block_res[2]  = { RESOURCE_ID_IMG_ZHOU, week_res };
-    date_block_apply(week_block, week_block_res, 2, week_changed);
+    date_block_apply(week_block, week_block_res, 2, week_changed, allow_animation);
 
     s_app.last_month = month;
     s_app.last_day = day;
