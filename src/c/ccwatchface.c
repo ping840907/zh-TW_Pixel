@@ -26,6 +26,10 @@
     #define DATE_RI_X 123
     #define DATE_ZHOU_X 146
     #define DATE_WEEK_X 169
+    // 月日合併為單一字串後，於此區域內水平置中（字與字間距 1px）
+    #define DATE_MD_REGION_X 0
+    #define DATE_MD_REGION_W 144
+    #define DATE_GLYPH_GAP 1
 #else
     #define TIME_IMAGE_SIZE GSize(66, 66)
     #define DATE_IMAGE_SIZE GSize(11, 11)
@@ -110,6 +114,12 @@ typedef struct {
     DisplayLayer yue_layer;
     DisplayLayer ri_layer;
     DisplayLayer zhou_layer;
+
+    // 日期區塊上次顯示的數值，用於偵測「月／日／週」各區塊是否變動以觸發跳動動畫。
+    // 初始化為 -1（不可能的數值），確保初次載入時三個區塊都會播放動畫。
+    int last_month;
+    int last_day;
+    int last_week;
 } AppState;
 
 // ==================== 全域狀態 ====================
@@ -535,6 +545,147 @@ static void display_layer_update(DisplayLayer *dl, uint32_t resource_id) {
     }
 }
 
+// ==================== 日期區塊佈局與動畫（Emery 專用）====================
+//
+// Emery 平台上，月與日合併為一條字串「X月X日」，依實際出現的字形緊鄰排列
+// （字與字間距 DATE_GLYPH_GAP）並於月日區域內水平置中。
+// 顯示以「月／日／週」三個區塊為單位：當某區塊的數值在初次載入或日期變動時
+// 發生改變，整塊（含數字與「月／日／周」標籤）一起播放跳動動畫。
+
+#if defined(PBL_PLATFORM_EMERY)
+
+// 強制讓圖層播放一次跳動動畫（下沉→載入新圖→上升回 base_frame），
+// 不受「內容未變」或「先前為空」限制，使同一區塊內所有字能同步跳動。
+static void date_layer_jump(DisplayLayer *dl, uint32_t resource_id) {
+    if (!dl || !dl->layer) return;
+
+    // 無內容的字形（如單位數月份的十位）直接清空歸位，毋須動畫
+    if (resource_id == RESOURCE_ID_NONE) {
+        display_layer_update_static(dl, RESOURCE_ID_NONE);
+        return;
+    }
+
+    display_layer_cleanup_animation(dl);
+
+    Layer *layer = bitmap_layer_get_layer(dl->layer);
+    dl->current_resource_id = resource_id;
+
+    // 第一段：自當前位置下沉，結束後由 anim_fade_out_stopped 載入新圖並上升回 base_frame
+    GRect from = layer_get_frame(layer);
+    GRect to = from;
+    to.origin.y += ANIMATION_OFFSET_Y;
+
+    dl->animation = property_animation_create_layer_frame(layer, &from, &to);
+    if (dl->animation) {
+        dl->anim_state = ANIM_STATE_FADE_OUT;
+        animation_set_duration((Animation *)dl->animation, ANIMATION_DURATION_MS / 2);
+        animation_set_curve((Animation *)dl->animation, AnimationCurveEaseIn);
+        animation_set_handlers((Animation *)dl->animation,
+                              (AnimationHandlers){.stopped = anim_fade_out_stopped}, dl);
+        animation_schedule((Animation *)dl->animation);
+    } else {
+        APP_LOG(APP_LOG_LEVEL_WARNING, "Failed to create date jump animation, falling back to static update");
+        display_layer_load_resource(dl, resource_id);
+        display_layer_set_position(dl, false);
+    }
+}
+
+// 區塊未變動時，僅將圖層歸位至（可能因重新置中而位移的）base_frame，內容保持不變。
+static void date_layer_reposition(DisplayLayer *dl) {
+    if (!dl) return;
+    display_layer_cleanup_animation(dl);
+    display_layer_set_position(dl, false);
+}
+
+// 設定日期圖層於日期列上的水平位置（更新 base_frame）。
+static void date_layer_set_base(DisplayLayer *dl, int x) {
+    if (!dl) return;
+    dl->base_frame = GRect(x, DATE_ROW_Y, DATE_IMAGE_SIZE.w, DATE_IMAGE_SIZE.h);
+}
+
+// 套用單一區塊：changed 為真時整塊跳動（動畫關閉時改為靜態更新），
+// 否則僅重新歸位（內容不變，因應月日字串重新置中所造成的位移）。
+static void date_block_apply(DisplayLayer **layers, const uint32_t *res, int count, bool changed) {
+    for (int i = 0; i < count; i++) {
+        if (changed) {
+            if (s_app.animation_enabled) {
+                date_layer_jump(layers[i], res[i]);
+            } else {
+                display_layer_update_static(layers[i], res[i]);
+            }
+        } else {
+            date_layer_reposition(layers[i]);
+        }
+    }
+}
+
+static void layout_and_animate_date_emery(int month, int day, int week,
+        uint32_t month_tens, uint32_t month_ones,
+        uint32_t day_tens, uint32_t day_ones, uint32_t week_res) {
+
+    const int step = DATE_IMAGE_SIZE.w + DATE_GLYPH_GAP;
+
+    // 月日字串的字形順序：[月十位][月個位][月][日十位][日個位][日]
+    // 缺省（NONE）的字形不佔位，使整條字串始終緊鄰排列。
+    DisplayLayer *md_layers[6] = {
+        &s_app.month_layers[0], &s_app.month_layers[1], &s_app.yue_layer,
+        &s_app.day_layers[0], &s_app.day_layers[1], &s_app.ri_layer
+    };
+    uint32_t md_res[6] = {
+        month_tens, month_ones, RESOURCE_ID_IMG_YUE,
+        day_tens, day_ones, RESOURCE_ID_IMG_RI
+    };
+
+    int present = 0;
+    for (int i = 0; i < 6; i++) {
+        if (md_res[i] != RESOURCE_ID_NONE) present++;
+    }
+
+    // 字串總寬 = 各字寬度相加 + 字間 1px 間距，於區域內置中求得起始 x
+    int total_w = present * DATE_IMAGE_SIZE.w + (present - 1) * DATE_GLYPH_GAP;
+    int start_x = DATE_MD_REGION_X + (DATE_MD_REGION_W - total_w) / 2;
+
+    int cursor = start_x;
+    for (int i = 0; i < 6; i++) {
+        if (md_res[i] != RESOURCE_ID_NONE) {
+            date_layer_set_base(md_layers[i], cursor);
+            cursor += step;
+        } else {
+            // 缺省字形稍後會被清空隱藏，位置無妨
+            date_layer_set_base(md_layers[i], start_x);
+        }
+    }
+
+    // 週區塊位置固定於右側
+    date_layer_set_base(&s_app.zhou_layer, DATE_ZHOU_X);
+    date_layer_set_base(&s_app.week_layer, DATE_WEEK_X);
+
+    bool month_changed = (month != s_app.last_month);
+    bool day_changed   = (day   != s_app.last_day);
+    bool week_changed  = (week  != s_app.last_week);
+
+    // 月區塊：十位、個位、「月」
+    DisplayLayer *month_block[3] = { &s_app.month_layers[0], &s_app.month_layers[1], &s_app.yue_layer };
+    uint32_t month_block_res[3]  = { month_tens, month_ones, RESOURCE_ID_IMG_YUE };
+    date_block_apply(month_block, month_block_res, 3, month_changed);
+
+    // 日區塊：十位、個位、「日」
+    DisplayLayer *day_block[3] = { &s_app.day_layers[0], &s_app.day_layers[1], &s_app.ri_layer };
+    uint32_t day_block_res[3]  = { day_tens, day_ones, RESOURCE_ID_IMG_RI };
+    date_block_apply(day_block, day_block_res, 3, day_changed);
+
+    // 週區塊：「周」、週值
+    DisplayLayer *week_block[2] = { &s_app.zhou_layer, &s_app.week_layer };
+    uint32_t week_block_res[2]  = { RESOURCE_ID_IMG_ZHOU, week_res };
+    date_block_apply(week_block, week_block_res, 2, week_changed);
+
+    s_app.last_month = month;
+    s_app.last_day = day;
+    s_app.last_week = week;
+}
+
+#endif // PBL_PLATFORM_EMERY
+
 // ==================== 時間更新邏輯 ====================
 
 static void update_time_display(struct tm *tick_time) {
@@ -613,11 +764,18 @@ static void update_date_display(struct tm *tick_time) {
     uint32_t week_res = (week == 0) ? RESOURCE_ID_IMG_RI :
                         DATE_LOWERCASE_ONES_RESOURCES[week];
 
+#if defined(PBL_PLATFORM_EMERY)
+    // Emery：月日合併為置中字串，並以區塊為單位播放跳動動畫
+    layout_and_animate_date_emery(month, day, week,
+                                  month_tens, month_ones,
+                                  day_tens, day_ones, week_res);
+#else
     display_layer_update(&s_app.month_layers[0], month_tens);
     display_layer_update(&s_app.month_layers[1], month_ones);
     display_layer_update(&s_app.day_layers[0], day_tens);
     display_layer_update(&s_app.day_layers[1], day_ones);
     display_layer_update(&s_app.week_layer, week_res);
+#endif
 }
 
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
@@ -797,7 +955,12 @@ static void outbox_failed_handler(DictionaryIterator *iter, AppMessageResult rea
 
 static void app_init(void) {
     memset(&s_app, 0, sizeof(AppState));
-    
+
+    // 以 -1 標記「尚未顯示過」，確保初次載入時月／日／週三區塊都會播放跳動動畫
+    s_app.last_month = -1;
+    s_app.last_day = -1;
+    s_app.last_week = -1;
+
     theme_load_from_storage(&s_app.theme);
     
     if (persist_exists(KEY_ANIMATION_ENABLED)) {
