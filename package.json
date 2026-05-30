@@ -10,12 +10,12 @@
         "mandarin",
         "\u4e2d\u6587"
     ],
-    "name": "ccwatchface",
+    "name": "zh-tw_pixel",
     "pebble": {
         "capabilities": [
             "configurable"
         ],
-        "displayName": "CCWatchface",
+        "displayName": "zh-TW_Pixel",
         "enableMultiJS": true,
         "messageKeys": {
             "KEY_ANIMATION_ENABLED": 3,
