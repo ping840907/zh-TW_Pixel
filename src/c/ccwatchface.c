@@ -553,7 +553,42 @@ static void display_layer_update(DisplayLayer *dl, uint32_t resource_id) {
 
 #if defined(PBL_PLATFORM_EMERY)
 
-// 強制讓圖層播放一次跳動動畫（下沉→載入新圖→上升回 base_frame），
+// 跳動第一段（下移）結束後接續第二段（上移回 base）。內容已於跳動開始時載入，
+// 故此處僅做位置動畫，不再換圖，確保數字／文字在整段跳動期間皆持續可見。
+static void date_anim_down_stopped(Animation *anim, bool finished, void *context) {
+    DisplayLayer *dl = (DisplayLayer *)context;
+    if (!dl || !dl->layer) {
+        if (dl) display_layer_cleanup_animation(dl);
+        return;
+    }
+
+    Layer *layer = bitmap_layer_get_layer(dl->layer);
+    if (!finished || !layer) {
+        // 下移段被中斷：直接歸位，避免殘留偏移
+        display_layer_set_position(dl, false);
+        display_layer_cleanup_animation(dl);
+        return;
+    }
+
+    GRect from = layer_get_frame(layer);
+    GRect to = dl->base_frame;
+
+    dl->animation = property_animation_create_layer_frame(layer, &from, &to);
+    if (!dl->animation) {
+        display_layer_set_position(dl, false);
+        display_layer_cleanup_animation(dl);
+        return;
+    }
+
+    dl->anim_state = ANIM_STATE_FADE_IN;
+    animation_set_duration((Animation *)dl->animation, ANIMATION_DURATION_MS / 2);
+    animation_set_curve((Animation *)dl->animation, AnimationCurveEaseOut);
+    animation_set_handlers((Animation *)dl->animation,
+                           (AnimationHandlers){.stopped = anim_fade_in_stopped}, dl);
+    animation_schedule((Animation *)dl->animation);
+}
+
+// 強制讓圖層播放一次純垂直跳動（自 base 下移 ANIMATION_OFFSET_Y、再上移回 base），
 // 不受「內容未變」或「先前為空」限制，使同一區塊內所有字能同步跳動。
 static void date_layer_jump(DisplayLayer *dl, uint32_t resource_id) {
     if (!dl || !dl->layer) return;
@@ -568,15 +603,15 @@ static void date_layer_jump(DisplayLayer *dl, uint32_t resource_id) {
 
     Layer *layer = bitmap_layer_get_layer(dl->layer);
 
-    // 先將圖層瞬間歸位至最終水平位置（僅調整位置、不更動內容），
-    // 確保接下來的跳動是「自 base 下移 5px、再上移回 base」的純垂直動作，
-    // 而非從舊（或重新置版前）位置斜向飛入。
+    // 立即載入內容並瞬間歸位至最終水平位置：
+    //   - 內容於跳動開始時即載入，使新數字／文字在整段下移與上移期間皆可見，
+    //     避免數字比「月／日／周」標籤更晚出現的瞬間缺失。
+    //   - 僅調整水平位置、不再換圖，使跳動維持「自 base 下移、再上移回 base」的純垂直動作。
+    display_layer_load_resource(dl, resource_id);
+    dl->current_resource_id = resource_id;
     layer_set_frame(layer, dl->base_frame);
 
-    // 記錄目標資源，待第一段下移結束後由 anim_fade_out_stopped 載入新圖並上移回位
-    dl->current_resource_id = resource_id;
-
-    // 第一段：自 base_frame 下移 ANIMATION_OFFSET_Y，結束後由 anim_fade_out_stopped 上移回 base
+    // 第一段：自 base_frame 下移 ANIMATION_OFFSET_Y，結束後由 date_anim_down_stopped 上移回 base
     GRect from = dl->base_frame;
     GRect to = from;
     to.origin.y += ANIMATION_OFFSET_Y;
@@ -587,12 +622,13 @@ static void date_layer_jump(DisplayLayer *dl, uint32_t resource_id) {
         animation_set_duration((Animation *)dl->animation, ANIMATION_DURATION_MS / 2);
         animation_set_curve((Animation *)dl->animation, AnimationCurveEaseIn);
         animation_set_handlers((Animation *)dl->animation,
-                              (AnimationHandlers){.stopped = anim_fade_out_stopped}, dl);
+                              (AnimationHandlers){.stopped = date_anim_down_stopped}, dl);
         animation_schedule((Animation *)dl->animation);
     } else {
+        // 動畫建立失敗：內容已載入，僅需歸位
         APP_LOG(APP_LOG_LEVEL_WARNING, "Failed to create date jump animation, falling back to static update");
-        display_layer_load_resource(dl, resource_id);
         display_layer_set_position(dl, false);
+        display_layer_cleanup_animation(dl);
     }
 }
 
