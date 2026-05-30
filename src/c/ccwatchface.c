@@ -567,10 +567,17 @@ static void date_layer_jump(DisplayLayer *dl, uint32_t resource_id) {
     display_layer_cleanup_animation(dl);
 
     Layer *layer = bitmap_layer_get_layer(dl->layer);
+
+    // 先將圖層瞬間歸位至最終水平位置（僅調整位置、不更動內容），
+    // 確保接下來的跳動是「自 base 下移 5px、再上移回 base」的純垂直動作，
+    // 而非從舊（或重新置版前）位置斜向飛入。
+    layer_set_frame(layer, dl->base_frame);
+
+    // 記錄目標資源，待第一段下移結束後由 anim_fade_out_stopped 載入新圖並上移回位
     dl->current_resource_id = resource_id;
 
-    // 第一段：自當前位置下沉，結束後由 anim_fade_out_stopped 載入新圖並上升回 base_frame
-    GRect from = layer_get_frame(layer);
+    // 第一段：自 base_frame 下移 ANIMATION_OFFSET_Y，結束後由 anim_fade_out_stopped 上移回 base
+    GRect from = dl->base_frame;
     GRect to = from;
     to.origin.y += ANIMATION_OFFSET_Y;
 
