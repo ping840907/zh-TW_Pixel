@@ -96,6 +96,7 @@ typedef struct {
     Window *main_window;
     ThemeConfig theme;
     bool animation_enabled;
+    bool is_24h;  // clock_is_24h_style() 的快取值，避免每分鐘重複系統呼叫
 
     DisplayLayer hour_layers[2];
     DisplayLayer minute_layers[2];
@@ -252,18 +253,24 @@ static void theme_apply_to_bitmap(const ThemeConfig *theme, GBitmap *bitmap, Lay
     // 圖片資源以固定色作為語意插槽，此處將其替換為當前主題配色：
     //   彩色平台：Red → 強調色，Black → 文字色（或強調色，視圖層類型）
     //   黑白平台：White → 強調色（同背景色），Black → 文字色（單色調色盤的唯一前景色）
-    for (int i = 0; i < palette_size; i++) {
+    // remaining 追蹤尚未替換的插槽數量，找齊後提前結束迴圈
+    int remaining = 2;
+    for (int i = 0; i < palette_size && remaining > 0; i++) {
 #if defined(PBL_COLOR)
         if (gcolor_equal(palette[i], GColorRed)) {
             palette[i] = accent_color;
+            remaining--;
         } else if (gcolor_equal(palette[i], GColorBlack)) {
             palette[i] = (type == LAYER_TYPE_MINUTE_ACCENT) ? accent_color : theme->text;
+            remaining--;
         }
 #else
         if (gcolor_equal(palette[i], GColorBlack)) {
             palette[i] = theme->text;
+            remaining--;
         } else if (gcolor_equal(palette[i], GColorWhite)) {
             palette[i] = accent_color;
+            remaining--;
         }
 #endif
     }
@@ -354,7 +361,9 @@ typedef void (*LayerIteratorCallback)(DisplayLayer *dl, void *context);
 static void iterate_all_layers(LayerIteratorCallback callback, void *context) {
     if (!callback) return;
 
-    DisplayLayer *all_layers[] = {
+    // static const：全域物件的地址是連結期常數，宣告為 static 使指標陣列存入 .rodata
+    // 而非每次呼叫都在 stack 上重新建立，減少 stack 使用並讓 CPU 直接讀取 ROM
+    static DisplayLayer * const all_layers[] = {
         &s_app.hour_layers[0], &s_app.hour_layers[1],
         &s_app.minute_layers[0], &s_app.minute_layers[1],
         &s_app.month_layers[0], &s_app.month_layers[1],
@@ -363,16 +372,14 @@ static void iterate_all_layers(LayerIteratorCallback callback, void *context) {
     };
 
     for (size_t i = 0; i < ARRAY_LENGTH(all_layers); i++) {
-        if (all_layers[i]) {
-            callback(all_layers[i], context);
-        }
+        callback(all_layers[i], context);
     }
 }
 
 static void iterate_animated_layers(LayerIteratorCallback callback, void *context) {
     if (!callback) return;
 
-    DisplayLayer *animated_layers[] = {
+    static DisplayLayer * const animated_layers[] = {
         &s_app.hour_layers[0], &s_app.hour_layers[1],
         &s_app.minute_layers[0], &s_app.minute_layers[1],
         &s_app.month_layers[0], &s_app.month_layers[1],
@@ -381,9 +388,7 @@ static void iterate_animated_layers(LayerIteratorCallback callback, void *contex
     };
 
     for (size_t i = 0; i < ARRAY_LENGTH(animated_layers); i++) {
-        if (animated_layers[i]) {
-            callback(animated_layers[i], context);
-        }
+        callback(animated_layers[i], context);
     }
 }
 
@@ -394,14 +399,17 @@ static void teardown_layer_cb(DisplayLayer *dl, void *context) {
     display_layer_deinit(dl);
 }
 
-// 重新套用主題色至點陣圖調色盤，並標記圖層需重繪
-static void refresh_theme_cb(DisplayLayer *dl, void *context) {
+// 停止動畫、歸位、釋放點陣圖並重置資源 ID，供 apply_theme_to_window() 強制重新載入
+static void reset_resource_id_cb(DisplayLayer *dl, void *context) {
+    if (!dl) return;
+    display_layer_cleanup_animation(dl);
+    display_layer_set_position(dl);
     if (dl->bitmap) {
-        theme_apply_to_bitmap(&s_app.theme, dl->bitmap, dl->type);
-        if (dl->layer) {
-            layer_mark_dirty(bitmap_layer_get_layer(dl->layer));
-        }
+        if (dl->layer) bitmap_layer_set_bitmap(dl->layer, NULL);
+        gbitmap_destroy(dl->bitmap);
+        dl->bitmap = NULL;
     }
+    dl->current_resource_id = RESOURCE_ID_NONE;
 }
 
 // 停止圖層進行中的動畫並歸位至基準位置（切換動畫開關時呼叫，以中止殘留動畫）
@@ -716,7 +724,7 @@ static void update_time_display(struct tm *tick_time) {
     if (!tick_time) return;
 
     int hour = tick_time->tm_hour;
-    if (!clock_is_24h_style()) {
+    if (!s_app.is_24h) {
         hour = hour % 12;
         if (hour == 0) hour = 12;
     }
@@ -809,10 +817,18 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
     }
 }
 
+// 取得當前時間並同時更新時間與日期顯示，供 window_load 和 apply_theme_to_window 共用
+static void update_display_now(void) {
+    time_t now = time(NULL);
+    struct tm *t = localtime(&now);
+    update_time_display(t);
+    update_date_display(t);
+}
+
 // ==================== UI 構建 ====================
 
 static void setup_all_layers(Layer *parent) {
-    DisplayLayer *layers[] = {
+    static DisplayLayer * const layers[] = {
         &s_app.hour_layers[0], &s_app.hour_layers[1],
         &s_app.minute_layers[0], &s_app.minute_layers[1],
         &s_app.month_layers[0], &s_app.month_layers[1],
@@ -835,7 +851,7 @@ static void setup_all_layers(Layer *parent) {
         GRect(DATE_ZHOU_X, DATE_ROW_Y, DATE_IMAGE_SIZE.w, DATE_IMAGE_SIZE.h),
     };
 
-    LayerType types[] = {
+    static const LayerType types[] = {
         LAYER_TYPE_HOUR, LAYER_TYPE_HOUR,
         LAYER_TYPE_MINUTE_NORMAL, LAYER_TYPE_MINUTE_ACCENT,
         LAYER_TYPE_DATE, LAYER_TYPE_DATE, LAYER_TYPE_DATE, LAYER_TYPE_DATE,
@@ -844,7 +860,7 @@ static void setup_all_layers(Layer *parent) {
 
     // 靜態資源（月、日、周）在初始化時一次性載入，不隨時間更新；
     // 動態圖層（時、分、日期數字）初始為 NONE，由 update_time_display / update_date_display 填入
-    uint32_t static_resources[] = {
+    static const uint32_t static_resources[] = {
         RESOURCE_ID_NONE, RESOURCE_ID_NONE, RESOURCE_ID_NONE, RESOURCE_ID_NONE,
         RESOURCE_ID_NONE, RESOURCE_ID_NONE, RESOURCE_ID_NONE, RESOURCE_ID_NONE,
         RESOURCE_ID_NONE, RESOURCE_ID_IMG_YUE, RESOURCE_ID_IMG_RI, RESOURCE_ID_IMG_ZHOU
@@ -865,23 +881,32 @@ static void teardown_all_layers(void) {
     iterate_all_layers(teardown_layer_cb, NULL);
 }
 
-static void refresh_all_layer_themes(void) {
-    iterate_all_layers(refresh_theme_cb, NULL);
-}
-
 static void apply_theme_to_window(void) {
     window_set_background_color(s_app.main_window, s_app.theme.background);
-    refresh_all_layer_themes();
+
+    // 重置所有圖層：停止動畫、釋放點陣圖、清空資源 ID
+    // 使 update_*_display() 能察覺「資源 ID 已改變」並以新主題強制重新載入
+    iterate_all_layers(reset_resource_id_cb, NULL);
+
+#if defined(PBL_PLATFORM_EMERY)
+    // Emery 以 last_* 追蹤日期狀態；重置後 layout_and_animate_date_emery()
+    // 會以 allow_animation=false 執行靜態重載，而非播放跳動動畫
+    s_app.last_month = -1;
+    s_app.last_day   = -1;
+    s_app.last_week  = -1;
+#endif
+
+    // 暫時停用動畫，確保設定變更時立刻靜態重繪，而非觸發換圖動畫
+    bool saved_anim = s_app.animation_enabled;
+    s_app.animation_enabled = false;
+    update_display_now();
+    s_app.animation_enabled = saved_anim;
 }
 
 static void main_window_load(Window *window) {
     Layer *window_layer = window_get_root_layer(window);
     setup_all_layers(window_layer);
-
-    time_t now = time(NULL);
-    struct tm *current_time = localtime(&now);
-    update_time_display(current_time);
-    update_date_display(current_time);
+    update_display_now();
 }
 
 static void main_window_unload(Window *window) {
@@ -986,7 +1011,8 @@ static void app_init(void) {
     s_app.last_week = -1;
 
     theme_load_from_storage(&s_app.theme);
-    
+    s_app.is_24h = clock_is_24h_style();
+
     if (persist_exists(KEY_ANIMATION_ENABLED)) {
         s_app.animation_enabled = persist_read_bool(KEY_ANIMATION_ENABLED);
     } else {
