@@ -394,14 +394,17 @@ static void teardown_layer_cb(DisplayLayer *dl, void *context) {
     display_layer_deinit(dl);
 }
 
-// 重新套用主題色至點陣圖調色盤，並標記圖層需重繪
-static void refresh_theme_cb(DisplayLayer *dl, void *context) {
+// 停止動畫、歸位、釋放點陣圖並重置資源 ID，供 apply_theme_to_window() 強制重新載入
+static void reset_resource_id_cb(DisplayLayer *dl, void *context) {
+    if (!dl) return;
+    display_layer_cleanup_animation(dl);
+    display_layer_set_position(dl);
     if (dl->bitmap) {
-        theme_apply_to_bitmap(&s_app.theme, dl->bitmap, dl->type);
-        if (dl->layer) {
-            layer_mark_dirty(bitmap_layer_get_layer(dl->layer));
-        }
+        if (dl->layer) bitmap_layer_set_bitmap(dl->layer, NULL);
+        gbitmap_destroy(dl->bitmap);
+        dl->bitmap = NULL;
     }
+    dl->current_resource_id = RESOURCE_ID_NONE;
 }
 
 // 停止圖層進行中的動畫並歸位至基準位置（切換動畫開關時呼叫，以中止殘留動畫）
@@ -865,13 +868,29 @@ static void teardown_all_layers(void) {
     iterate_all_layers(teardown_layer_cb, NULL);
 }
 
-static void refresh_all_layer_themes(void) {
-    iterate_all_layers(refresh_theme_cb, NULL);
-}
-
 static void apply_theme_to_window(void) {
     window_set_background_color(s_app.main_window, s_app.theme.background);
-    refresh_all_layer_themes();
+
+    // 重置所有圖層：停止動畫、釋放點陣圖、清空資源 ID
+    // 使 update_*_display() 能察覺「資源 ID 已改變」並以新主題強制重新載入
+    iterate_all_layers(reset_resource_id_cb, NULL);
+
+#if defined(PBL_PLATFORM_EMERY)
+    // Emery 以 last_* 追蹤日期狀態；重置後 layout_and_animate_date_emery()
+    // 會以 allow_animation=false 執行靜態重載，而非播放跳動動畫
+    s_app.last_month = -1;
+    s_app.last_day   = -1;
+    s_app.last_week  = -1;
+#endif
+
+    // 暫時停用動畫，確保設定變更時立刻靜態重繪，而非觸發換圖動畫
+    bool saved_anim = s_app.animation_enabled;
+    s_app.animation_enabled = false;
+    time_t now = time(NULL);
+    struct tm *current_time = localtime(&now);
+    update_time_display(current_time);
+    update_date_display(current_time);
+    s_app.animation_enabled = saved_anim;
 }
 
 static void main_window_load(Window *window) {
